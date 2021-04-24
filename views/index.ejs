@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/bootstrap.min.css' />
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <p>Welcome to <%= title %></p>
+
+    <table class="table table-condensed col-md-6 offset-md-3">
+      <tr>
+        <th>Stock</th>
+        <th class="text-end">Price</th>
+      </tr>
+      <tr>
+        <td>Apple (aapl)</td>
+        <td><div align="right" id="aapl">&nbsp;</div></td>
+      </tr>
+      <tr>
+        <td>Microsoft (msft)</td>
+        <td><div align="right" id="msft">&nbsp;</div></td>
+      </tr>
+      <tr>
+        <td>Oracle (orcl)</td>
+        <td ><div align="right" id="orcl">&nbsp;</div></td>
+      </tr>
+    </table>
+    <div class="jumbotron"><%=test %></div>
+    <div class="col-md-4">
+      <canvas id="myChart"></canvas>
+    </div>
+    <script type="text/javascript" src="/javascripts/chart.min.js"></script>
+    <script>
+    data = {
+            labels: [1,2,3,4,5,6,7,8,9,10],
+            datasets: [{
+              label: 'My First dataset',
+              backgroundColor: 'rgb(255, 99, 132)',
+              borderColor: 'rgb(255, 99, 132)',
+              data:[1,2,3,4,5]
+            }]
+          };
+    const config = {
+      type: 'line',
+      data,
+      options: {}
+    };
+
+    </script>
+
+    <script type="text/javascript" src="/javascripts/socket.io.js"></script>
+    <script>
+    var myChart = new Chart(
+      document.getElementById('myChart'),
+      config);
+      var socket = io();
+      socket.on('tick', function(msg) {
+        var item = document.getElementById(msg.ticker);
+        if(item.innerText < msg.prices[0]){
+            item.className = "btn-success";
+        } else {
+          item.className = "btn-danger";
+        }
+        item.innerText = msg.prices[0];
+        myChart.data.datasets[0].data = msg.prices;
+        myChart.data.datasets[0].label = msg.ticker;
+        myChart.update();
+        setTimeout(function(){
+             item.className = "btn-body";
+         }, 1000);
+
+
+
+      });//end tick
+    </script>
+
+  </body>
+</html>
