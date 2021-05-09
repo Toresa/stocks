@@ -57,12 +57,12 @@
       var socket = io();
       socket.on('tick', function(msg) {
         var item = document.getElementById(msg.ticker);
-        if(item.innerText < msg.prices[0]){
+        if(item.innerText < msg.prices[0].price){
             item.className = "btn-success";
         } else {
           item.className = "btn-danger";
         }
-        item.innerText = msg.prices[0];
+        item.innerText = msg.prices[0].price;
         myChart.data.datasets[0].data = msg.prices;
         myChart.data.datasets[0].label = msg.ticker;
         myChart.update();

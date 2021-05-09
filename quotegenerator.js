@@ -10,9 +10,13 @@ QuoteGenerator.init = function(app){
   }
 
   const getPrice = price => {
-    //var initialPrice = price;
     var sleeptime = 5000 * Math.random();
-    return sleep(sleeptime).then(v => (Math.round((price * (1 + Math.random()/100))*100))/100).catch( e => console.log("errror", e))
+    var tickerObj = {};
+    return sleep(sleeptime).then(v => {
+      tickerObj.price = Math.round((price * (1 + Math.random() / 100)) * 100) / 100;
+      tickerObj.time = new Date();
+      return tickerObj
+    }).catch(e => console.log("errror", e))
   }
 
 
@@ -24,14 +28,14 @@ QuoteGenerator.init = function(app){
       var indexStock = Math.round(2.5*Math.random());
       var stock = stocks[indexStock];
       console.log(stock);
-      const price = await getPrice(stock.price)
-      stock.prices.push(price);
+      const tickerObj = await getPrice(stock.price)
+      stock.prices.push(tickerObj.price);
       if( stock.prices.length > 10) {
         stock.prices = stock.prices.reverse();
         stock.prices.pop();
       }
       console.log(stock.prices);
-        app.io.emit('tick', {ticker:stock.ticker, price: price, prices:stock.prices});
+        app.io.emit('tick', {ticker:stock.ticker, price: tickerObj.price, prices:stock.prices});
     }
   }
   forLoop();
