@@ -26,45 +26,73 @@
         <td ><div align="right" id="orcl">&nbsp;</div></td>
       </tr>
     </table>
-    <div class="jumbotron"><%=test %></div>
     <div class="col-md-4">
       <canvas id="myChart"></canvas>
     </div>
-    <script type="text/javascript" src="/javascripts/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@0.1.1"></script>
     <script>
     data = {
             labels: [1,2,3,4,5,6,7,8,9,10],
+            //labels: [],
             datasets: [{
-              label: 'My First dataset',
-              backgroundColor: 'rgb(255, 99, 132)',
+              label: '',
+              //backgroundColor: 'rgb(255, 99, 132)',
               borderColor: 'rgb(255, 99, 132)',
-              data:[1,2,3,4,5]
+              data:[1,2,3,4,5,6,7,8,9,10]
             }]
           };
     const config = {
       type: 'line',
       data,
-      options: {}
+      options: {
+          scales: {
+            xAxes: [{
+                        type: 'time',
+                        time: {
+                            parser: 'YYYY-MM-DDTHH:mm:ss.sssZ',
+                            unit: 'hour',
+                            displayFormats: {
+                                'minute': 'HH:mm:ss',
+                                'hour': 'HH:mm:ss',
+                                'minute': 'HH:mm:ss'
+                            }
+                        },
+                        labels: {
+                            source: 'auto'
+                        }
+                    }]
+          }
+      } //end options
     };
 
     </script>
 
     <script type="text/javascript" src="/javascripts/socket.io.js"></script>
     <script>
-    var myChart = new Chart(
-      document.getElementById('myChart'),
-      config);
+      var canvas = document.getElementById('myChart')
+      var option = {
+          showLines: true
+      };
+      var myChart = Chart.Line(canvas,{
+          data:data,
+        options:option
+      });
       var socket = io();
       socket.on('tick', function(msg) {
+        var currentPrice = msg.prices[msg.prices.length-1];
         var item = document.getElementById(msg.ticker);
-        if(item.innerText < msg.prices[0].price){
+        if (item.innerText < currentPrice) {
             item.className = "btn-success";
         } else {
           item.className = "btn-danger";
         }
-        item.innerText = msg.prices[0].price;
+        item.innerText = currentPrice;
         myChart.data.datasets[0].data = msg.prices;
+        myChart.data.datasets[0].labels = msg.dates;
         myChart.data.datasets[0].label = msg.ticker;
+        //myChart.data.datasets[0].ticks = msg.dates;
         myChart.update();
         setTimeout(function(){
              item.className = "btn-body";

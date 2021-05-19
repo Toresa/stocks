@@ -6,7 +6,7 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Random stock quote generator', test: "Dette er en test" });
+  res.render('index', { title: 'Random stock quote generator' });
 });
 
 /*
