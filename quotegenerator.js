@@ -1,6 +1,7 @@
 
 (function (QuoteGenerator) {
 
+var config = require("./config");
 
 QuoteGenerator.init = function(app){
 
@@ -10,7 +11,7 @@ QuoteGenerator.init = function(app){
   }
 
   const getPrice = price => {
-    var sleeptime = 5000 * Math.random();
+    var sleeptime = config.sleeptime * Math.random();
     var tickerObj = {};
     return sleep(sleeptime).then(v => {
       tickerObj.price = Math.round((price * (1 + Math.random() / 100)) * 100) / 100;
@@ -21,20 +22,16 @@ QuoteGenerator.init = function(app){
 
 
   const forLoop = async (connections) => {
-    var stocks = [{"ticker":"aapl", "price":127, "prices":[127], "dates":[new Date()]},
-                  {"ticker":"msft", "price":250, "prices":[250], "dates":[new Date()]},
-                  {"ticker":"orcl","price":74, "prices":[74], "dates":[new Date()]}];
+    var stocks = config.stocks;
     while (true) {
-      var indexStock = Math.round(2.5*Math.random());
+      var indexStock = Math.round((config.stocks.length - 0.5) * Math.random());
       var stock = stocks[indexStock];
       console.log(stock);
       const tickerObj = await getPrice(stock.price)
       stock.prices.push(tickerObj.price);
       stock.dates.push(tickerObj.time);
-      if (stock.prices.length > 10) {
-        //stock.prices = stock.prices.reverse();
+      if (stock.prices.length > config.tickHistoryLength) {
         stock.prices.shift();
-        //stock.dates = stock.dates.reverse();
         stock.dates.shift();
       }
         app.io.emit('tick', {ticker: stock.ticker, price: tickerObj.price, prices: stock.prices, dates: stock.dates});
